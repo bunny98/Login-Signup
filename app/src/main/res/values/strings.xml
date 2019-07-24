@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">try1</string>
+    <string name="notifications_admin_channel_name">CraftWoo Admin</string>
+    <string name="notifications_admin_channel_description">Test App Channel</string>
+</resources>

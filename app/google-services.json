@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "958402934901",
+    "firebase_url": "https://craftwoosample.firebaseio.com",
+    "project_id": "craftwoosample",
+    "storage_bucket": "craftwoosample.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958402934901:android:00eda874a0fdb1b7",
+        "android_client_info": {
+          "package_name": "com.example.shiva.try1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958402934901-ihluvunl1qvmou2ud18k69rs7mqtlv3q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPkKfhGfETeJMPW6r4aarE7i1Opvzz16U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958402934901-ihluvunl1qvmou2ud18k69rs7mqtlv3q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
