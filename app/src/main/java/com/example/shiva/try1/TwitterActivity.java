@@ -31,21 +31,19 @@ public class TwitterActivity extends Activity {
      * Register your here app https://dev.twitter.com/apps/new and get your
      * consumer key and secret
      * */
-    static String TWITTER_CONSUMER_KEY = "z3RgnDTJbZ2PcH0u0YRj1zIIp";
-    static String TWITTER_CONSUMER_SECRET = "cEL5Pw360tpOLntZKRceXdJLwWqpbTlKWUml8DDo3A1lq4vqiP";
+    static String TWITTER_CONSUMER_KEY = "1XaingVxiBgD7Fhfb0SOYfrOc";
+    static String TWITTER_CONSUMER_SECRET = "i9DCGq0ckx67AdMH6xzed9RDpM3xJVDNfjMr4wUADL3CWTjFJl";
 
     // Preference Constants
-    static String PREFERENCE_NAME = "twitter_oauth";
+
     static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";
     static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
     static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
 
-    static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
+    static final String TWITTER_CALLBACK_URL = "http://localhost:8000";
 
-    // Twitter oauth urls
-    static final String URL_TWITTER_AUTH = "auth_url";
     static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
-    static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
+
 
     // Login button
     Button btnLoginTwitter;
@@ -120,7 +118,7 @@ public class TwitterActivity extends Activity {
             @Override
             public void onClick(View arg0) {
                 // Call login twitter function
-                loginToTwitter();
+                new LoginToTwitter().execute();
             }
         });
 
@@ -165,87 +163,131 @@ public class TwitterActivity extends Activity {
          * redirected from twitter page. Parse the uri to get oAuth
          * Verifier
          * */
-        if (!isTwitterLoggedInAlready()) {
-            Uri uri = getIntent().getData();
-            if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
-                // oAuth verifier
-                String verifier = uri
-                        .getQueryParameter(URL_TWITTER_OAUTH_VERIFIER);
 
-                try {
-                    // Get the access token
-                    AccessToken accessToken = twitter.getOAuthAccessToken(
-                            requestToken, verifier);
-
-                    // Shared Preferences
-                    Editor e = mSharedPreferences.edit();
-
-                    // After getting access token, access token secret
-                    // store them in application preferences
-                    e.putString(PREF_KEY_OAUTH_TOKEN, accessToken.getToken());
-                    e.putString(PREF_KEY_OAUTH_SECRET,
-                            accessToken.getTokenSecret());
-                    // Store login status - true
-                    e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
-                    e.commit(); // save changes
-
-                    Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
-
-                    // Hide login button
-                    btnLoginTwitter.setVisibility(View.GONE);
-
-                    // Show Update Twitter
-                    lblUpdate.setVisibility(View.VISIBLE);
-                    txtUpdate.setVisibility(View.VISIBLE);
-                    btnUpdateStatus.setVisibility(View.VISIBLE);
-                    btnLogoutTwitter.setVisibility(View.VISIBLE);
-
-                    // Getting user details from twitter
-                    // For now i am getting his name only
-                    long userID = accessToken.getUserId();
-                    User user = twitter.showUser(userID);
-                    String username = user.getName();
-
-                    // Displaying in xml ui
-                    lblUserName.setText(Html.fromHtml("<b>Welcome " + username + "</b>"));
-                } catch (Exception e) {
-                    // Check log for login errors
-                    Log.e("Twitter Login Error", "> " + e.getMessage());
-                }
-            }
+        if(!isTwitterLoggedInAlready()) {
+            new LoggedIn().execute();
         }
+        else {
+            // user already logged into twitter
+            Toast.makeText(getApplicationContext(),
+                    "Already Logged into twitter", Toast.LENGTH_LONG).show();
+        }
+
+
+
 
     }
 
     /**
      * Function to login twitter
      * */
-    private void loginToTwitter() {
-        // Check if already logged in
-        if (!isTwitterLoggedInAlready()) {
-            ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.setOAuthConsumerKey(TWITTER_CONSUMER_KEY);
-            builder.setOAuthConsumerSecret(TWITTER_CONSUMER_SECRET);
-            Configuration configuration = builder.build();
-
-            TwitterFactory factory = new TwitterFactory(configuration);
-            twitter = factory.getInstance();
-
-            try {
-                requestToken = twitter
-                        .getOAuthRequestToken(TWITTER_CALLBACK_URL);
-                this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
-                        .parse(requestToken.getAuthenticationURL())));
-            } catch (TwitterException e) {
-                e.printStackTrace();
-            }
-        } else {
-            // user already logged into twitter
-            Toast.makeText(getApplicationContext(),
-                    "Already Logged into twitter", Toast.LENGTH_LONG).show();
+    class LoginToTwitter extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(TwitterActivity.this);
+            pDialog.setMessage("Opening Authorization URL in browser");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
         }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (!isTwitterLoggedInAlready()) {
+                ConfigurationBuilder builder = new ConfigurationBuilder();
+                builder.setOAuthConsumerKey(TWITTER_CONSUMER_KEY);
+                builder.setOAuthConsumerSecret(TWITTER_CONSUMER_SECRET);
+                Configuration configuration = builder.build();
+
+                TwitterFactory factory = new TwitterFactory(configuration);
+                twitter = factory.getInstance();
+
+                try {
+                    requestToken = twitter
+                            .getOAuthRequestToken(TWITTER_CALLBACK_URL);
+                    Log.v("BACKGROUND", requestToken.getAuthorizationURL());
+                    getApplication().startActivity(new Intent(Intent.ACTION_VIEW, Uri
+                            .parse(requestToken.getAuthenticationURL())));
+                    Log.v("BACKGROUND", requestToken.getAuthorizationURL());
+                } catch (TwitterException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
     }
 
+    class LoggedIn extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                    Uri uri = getIntent().getData();
+                    if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
+                        // oAuth verifier
+                        String verifier = uri
+                                .getQueryParameter(URL_TWITTER_OAUTH_VERIFIER);
+
+
+                        // Get the access token
+                        Log.v("TWITTER", "BEFORE ACCESS");
+                        final AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, verifier);
+                        Log.v("TWITTER", accessToken.toString());
+
+                        // Shared Preferences
+                        Editor e = mSharedPreferences.edit();
+
+                        // After getting access token, access token secret
+                        // store them in application preferences
+                        e.putString(PREF_KEY_OAUTH_TOKEN, accessToken.getToken());
+                        e.putString(PREF_KEY_OAUTH_SECRET,
+                                accessToken.getTokenSecret());
+                        // Store login status - true
+                        e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
+                        e.commit(); // save changes
+
+                        Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // Hide login button
+                                btnLoginTwitter.setVisibility(View.GONE);
+
+                                // Show Update Twitter
+                                lblUpdate.setVisibility(View.VISIBLE);
+                                txtUpdate.setVisibility(View.VISIBLE);
+                                btnUpdateStatus.setVisibility(View.VISIBLE);
+                                btnLogoutTwitter.setVisibility(View.VISIBLE);
+
+                                // Getting user details from twitter
+                                // For now i am getting his name only
+                                long userID = accessToken.getUserId();
+                                try {
+                                    User user = twitter.showUser(userID);
+                                    String username = user.getName();
+
+                                    // Displaying in xml ui
+                                    lblUserName.setText(Html.fromHtml("<b>Welcome " + username + "</b>"));
+                                } catch (Exception e) {
+                                    Log.v("OnPostExeceute", "Exception Occured");
+                                }
+                            }
+                        });
+
+                }
+            }
+            catch (Exception e) {
+                        // Check log for login errors
+                        Log.e("Twitter Login Error", "> " + e.getMessage());
+                    }
+
+
+            return null;
+        }
+
+
+    }
     /**
      * Function to update status
      * */
