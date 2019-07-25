@@ -19,10 +19,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import twitter4j.Twitter;
+
 
 public class login extends AppCompatActivity {
     EditText Email, Password;
-    Button LogInButton, RegisterButton;
+    Button LogInButton, RegisterButton, TwitterButoon;
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthListner;
     FirebaseUser mUser;
@@ -53,6 +55,8 @@ public class login extends AppCompatActivity {
         LogInButton = (Button) findViewById(R.id.buttonLogin);
 
         RegisterButton = (Button) findViewById(R.id.buttonRegister);
+
+        TwitterButoon = (Button) findViewById(R.id.loginWithTwitter);
 
         Email = (EditText) findViewById(R.id.editEmail);
         Password = (EditText) findViewById(R.id.editPassword);
@@ -98,6 +102,14 @@ public class login extends AppCompatActivity {
                 Intent intent = new Intent(login.this, Register.class);
                 startActivity(intent);
 
+            }
+        });
+
+        TwitterButoon.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(login.this, TwitterActivity.class);
+                startActivity(intent);
             }
         });
 

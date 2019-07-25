@@ -17,6 +17,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.List;
+
+import twitter4j.Paging;
+import twitter4j.QueryResult;
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.Status;
+import twitter4j.auth.AccessToken;
+
 public class DashboardActivity extends AppCompatActivity {
 
     String EmailHolder;
@@ -42,6 +51,23 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Setting up received email to TextView.
         Email.setText(Email.getText().toString()+ EmailHolder);
+
+        TwitterFactory factory = new TwitterFactory();
+        Twitter twitter = factory.getInstance();
+        twitter.setOAuthConsumer("z3RgnDTJbZ2PcH0u0YRj1zIIp", "cEL5Pw360tpOLntZKRceXdJLwWqpbTlKWUml8DDo3A1lq4vqiP");
+        AccessToken accessToken = new AccessToken("1153381672148094976-dpR7zoup0ZmTo8XJ9GWv5kYtcTcoki", "P8taY8eGm4oDQhpaX63gPb0tVkRrG0pao4UUSimR9sEm3");
+        twitter.setOAuthAccessToken(accessToken);
+
+        int totalTweets = 20;// no of tweets to be fetched
+        Paging paging = new Paging(1, totalTweets);
+        try {
+            List<Status> statuses = twitter.getHomeTimeline();
+            for (Status status : statuses) {
+                Log.v("Timeline", status.getUser().getName() + ":" +
+                        status.getText());
+            }
+
+        }catch (Exception e){ Log.v("Timeline", "EXCEPTION");}
 
         // Adding click listener to Log Out button.
 
